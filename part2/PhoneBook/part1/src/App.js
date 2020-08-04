@@ -3,6 +3,7 @@ import Filter from './components/Filter';
 import PersonForm from "./components/PersonForm";
 import Persons from './components/Persons'
 import { getAll, create, deleteById, updateData } from './components/GetData'
+import Notification from './components/Notification'
 
 
 const App = () => {
@@ -11,7 +12,7 @@ const App = () => {
   const [newPhone, setNewPhone] = useState('')
   const [search, setSearch] = useState(false)
   const [searchText, setSearchText] = useState('')
-
+  const [notification, setNotification] = useState('')
   useEffect(() => {
     getAll().then(data => {
       setPersons(data)
@@ -61,27 +62,30 @@ const App = () => {
     }
     setPersons(persons.concat(addNewName))
     create(addNewName)
+    setNotification("Added " + addNewName.name)
     setNewName('')
     setNewPhone('')
   }
 
   const deletePerson = (id, name) => {
     if (window.confirm(`Delete ${name}`)) {
-      deleteById(id)
+      deleteById(id).catch(error => {
+        setNotification(`Information of ${name} has already been removed from server`)
+      })
       setPersons(persons.filter(person => person.id != id))
     }
   }
 
   return (
     <div>
-      <Filter searchText={searchText} changeSearch={changeSearch} />
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
+      <Filter searchText={searchText} changeSearch={changeSearch} />
       <PersonForm addName={addName} newName={newName} changeName={changeName}
         newPhone={newPhone} changePhone={changePhone} />
       <div>debug:newName {newName}</div>
       <div>debug:newPhone {newPhone}</div>
       <div>debug:searchText {searchText}</div>
-
       <h2>Numbers</h2>
       <ul>
         {personsAFFilter.map(person =>
